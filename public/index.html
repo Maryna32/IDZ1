@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ІДЗ1</title>
+    <style>
+      .container {
+        display: flex;
+        gap: 30px;
+        flex-wrap: wrap;
+      }
+      section {
+        border: 1px solid black;
+        padding-left: 15px;
+        width: 30%;
+        height: 130px;
+        box-shadow: 1px 1px 1px 1px grey;
+        padding-bottom: 20px;
+      }
+
+      .results {
+        margin-top: 15px;
+      }
+
+      table,
+      th,
+      td {
+        border: 1px solid black;
+      }
+      .hidden {
+        display: none;
+      }
+
+      @media (max-width: 768px) {
+        .container {
+          flex-direction: column;
+        }
+        section {
+          width: 90%;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <h2>
+      Варіант 2. БД для зберігання інформації про процес роботи співробітників
+      над проектами
+    </h2>
+
+    <div class="container">
+      <section>
+        <h3>
+          Інформація про виконані завдання за обраним проєктом на зазначену дату
+        </h3>
+        <form id="informationForm">
+          <label for="nameProject">Введіть назву проекта</label>
+          <select name="nameProject" id="nameProject"></select>
+          <label for="date_project">Оберіть дату</label>
+          <select name="date_project" id="date_project"></select>
+
+          <input type="submit" value="Отримати результат" />
+        </form>
+      </section>
+
+      <section>
+        <h3>Загальний час роботи над обраним проєктом</h3>
+        <form id="timeForm">
+          <label for="projectName">Введіть назву проекта</label>
+          <select name="nameProject" id="projectName"></select>
+          <input type="submit" value="Отримати результат" />
+        </form>
+      </section>
+
+      <section>
+        <h3>Кількість співробітників відділу обраного керівника</h3>
+        <form id="countForm">
+          <label for="chief">Введіть ім'я керівника</label>
+          <select name="chief" id="chief"></select>
+          <input type="submit" value="Отримати результат" />
+        </form>
+      </section>
+
+      <div class="results" id="results"></div>
+    </div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", async function () {
+        await Promise.all([loadProjects(), loadDates(), loadChiefs()]);
+        document
+          .getElementById("informationForm")
+          .addEventListener("submit", handleInformationForm);
+        document
+          .getElementById("timeForm")
+          .addEventListener("submit", handleTimeForm);
+        document
+          .getElementById("countForm")
+          .addEventListener("submit", handleCountForm);
+      });
+
+      async function loadProjects() {
+        try {
+          const response = await fetch("/api/projects");
+          const data = await response.json();
+
+          const nameProjectSelects = document.querySelectorAll(
+            "#nameProject, #projectName"
+          );
+          nameProjectSelects.forEach((select) => {
+            select.innerHTML = "";
+            data.forEach((item) => {
+              const option = document.createElement("option");
+              option.textContent = item.name_project;
+              option.value = item.name_project;
+              select.appendChild(option);
+            });
+          });
+        } catch (error) {
+          console.error("Error loading projects:", error);
+        }
+      }
+
+      async function loadDates() {
+        try {
+          const response = await fetch("/api/dates");
+          const data = await response.json();
+
+          const dateSelect = document.getElementById("date_project");
+          dateSelect.innerHTML = "";
+          data.forEach((item) => {
+            const option = document.createElement("option");
+            option.textContent = formatDate(item.date_project);
+            option.value = formatDate(item.date_project);
+            dateSelect.appendChild(option);
+          });
+        } catch (error) {
+          console.error("Error loading dates:", error);
+        }
+      }
+
+      async function loadChiefs() {
+        try {
+          const response = await fetch("/api/chiefs");
+          const data = await response.json();
+
+          const chiefSelect = document.getElementById("chief");
+          chiefSelect.innerHTML = "";
+          data.forEach((item) => {
+            const option = document.createElement("option");
+            option.textContent = item.chief;
+            option.value = item.chief;
+            chiefSelect.appendChild(option);
+          });
+        } catch (error) {
+          console.error("Error loading chiefs:", error);
+        }
+      }
+
+      async function handleInformationForm(e) {
+        e.preventDefault();
+        const nameProject = document.getElementById("nameProject").value;
+        const date_project = document.getElementById("date_project").value;
+
+        try {
+          const response = await fetch(
+            `/api/information-for-date?nameProject=${encodeURIComponent(
+              nameProject
+            )}&date_project=${encodeURIComponent(date_project)}`
+          );
+          const data = await response.json();
+
+          displayInformationResults(data);
+        } catch (error) {
+          console.error("Error fetching information:", error);
+          document.getElementById("results").innerHTML =
+            "<h2>Помилка при отриманні даних</h2>";
+        }
+      }
+
+      async function handleTimeForm(e) {
+        e.preventDefault();
+        const nameProject = document.getElementById("projectName").value;
+
+        try {
+          const response = await fetch(
+            `/api/time-for-project?nameProject=${encodeURIComponent(
+              nameProject
+            )}`
+          );
+          const data = await response.json();
+
+          displayTimeResults(data);
+        } catch (error) {
+          console.error("Error fetching time information:", error);
+          document.getElementById("results").innerHTML =
+            "<h2>Помилка при отриманні даних</h2>";
+        }
+      }
+
+      async function handleCountForm(e) {
+        e.preventDefault();
+        const chief = document.getElementById("chief").value;
+
+        try {
+          const response = await fetch(
+            `/api/count-workers?chief=${encodeURIComponent(chief)}`
+          );
+          const data = await response.json();
+
+          displayCountResults(data);
+        } catch (error) {
+          console.error("Error fetching worker count:", error);
+          document.getElementById("results").innerHTML =
+            "<h2>Помилка при отриманні даних</h2>";
+        }
+      }
+
+      function displayInformationResults(data) {
+        const resultsDiv = document.getElementById("results");
+
+        if (data.length === 0) {
+          resultsDiv.innerHTML =
+            "<h2>Немає даних за обраними параметрами.</h2>";
+          return;
+        }
+
+        let html = `
+          <h2>Результати пошуку</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>ID worker</th>
+                <th>Date project</th>
+                <th>Date start</th>
+                <th>Date end</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+        `;
+
+        data.forEach((row) => {
+          html += `
+            <tr>
+              <td>${row.FID_Worker}</td>
+              <td>${formatDate(row.date_project)}</td>
+              <td>${formatDate(row.time_start)}</td>
+              <td>${formatDate(row.time_end)}</td>
+              <td>${row.description}</td>
+            </tr>
+          `;
+        });
+
+        html += `
+            </tbody>
+          </table>
+        `;
+
+        resultsDiv.innerHTML = html;
+      }
+
+      function displayTimeResults(data) {
+        const resultsDiv = document.getElementById("results");
+
+        if (data.length === 0) {
+          resultsDiv.innerHTML = "<h2>Немає даних за обраним проєктом.</h2>";
+          return;
+        }
+
+        let html = `
+          <h2>Загальний час роботи над проєктом</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>Name project</th>
+                <th>Total count days</th>
+                <th>Manager</th>
+              </tr>
+            </thead>
+            <tbody>
+        `;
+
+        data.forEach((row) => {
+          html += `
+            <tr>
+              <td>${row.name_project}</td>
+              <td>${row.total_days}</td>
+              <td>${row.manager}</td>
+            </tr>
+          `;
+        });
+
+        html += `
+            </tbody>
+          </table>
+        `;
+
+        resultsDiv.innerHTML = html;
+      }
+
+      function displayCountResults(data) {
+        const resultsDiv = document.getElementById("results");
+
+        if (data.length === 0) {
+          resultsDiv.innerHTML = "<h2>Немає даних для обраного керівника.</h2>";
+          return;
+        }
+
+        let html = `
+          <h2>Кількість співробітників</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>Chief</th>
+                <th>Employee count</th>
+              </tr>
+            </thead>
+            <tbody>
+        `;
+
+        data.forEach((row) => {
+          html += `
+            <tr>
+              <td>${row.chief}</td>
+              <td>${row.worker_count}</td>
+            </tr>
+          `;
+        });
+
+        html += `
+            </tbody>
+          </table>
+        `;
+
+        resultsDiv.innerHTML = html;
+      }
+
+      function formatDate(dateString) {
+        if (!dateString) return "";
+        const date = new Date(dateString);
+        return date.toISOString().split("T")[0];
+      }
+    </script>
+  </body>
+</html>
