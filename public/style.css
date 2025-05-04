@@ -1,0 +1,36 @@
+.container {
+  display: flex;
+  gap: 30px;
+  flex-wrap: wrap;
+}
+
+section {
+  border: 1px solid black;
+  padding: 15px;
+  width: 30%;
+  min-height: 250px;
+  box-shadow: 1px 1px 1px 1px grey;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.results {
+  margin-top: 15px;
+}
+
+th,
+td {
+  padding: 6px 10px;
+  text-align: left;
+  border: 1px solid black;
+}
+
+h2 {
+  margin-bottom: 10px;
+  font-size: 18px;
+}
+
+.hidden {
+  display: none;
+}
