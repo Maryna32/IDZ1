@@ -10,35 +10,36 @@
         gap: 30px;
         flex-wrap: wrap;
       }
+
       section {
         border: 1px solid black;
-        padding-left: 15px;
+        padding: 15px;
         width: 30%;
-        height: 130px;
+        min-height: 250px;
         box-shadow: 1px 1px 1px 1px grey;
-        padding-bottom: 20px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
       }
 
       .results {
         margin-top: 15px;
       }
 
-      table,
       th,
       td {
+        padding: 6px 10px;
+        text-align: left;
         border: 1px solid black;
       }
-      .hidden {
-        display: none;
+
+      h2 {
+        margin-bottom: 10px;
+        font-size: 18px;
       }
 
-      @media (max-width: 768px) {
-        .container {
-          flex-direction: column;
-        }
-        section {
-          width: 90%;
-        }
+      .hidden {
+        display: none;
       }
     </style>
   </head>
@@ -58,9 +59,9 @@
           <select name="nameProject" id="nameProject"></select>
           <label for="date_project">Оберіть дату</label>
           <select name="date_project" id="date_project"></select>
-
           <input type="submit" value="Отримати результат" />
         </form>
+        <div class="results" id="results-information"></div>
       </section>
 
       <section>
@@ -70,6 +71,7 @@
           <select name="nameProject" id="projectName"></select>
           <input type="submit" value="Отримати результат" />
         </form>
+        <div class="results" id="results-time"></div>
       </section>
 
       <section>
@@ -79,9 +81,12 @@
           <select name="chief" id="chief"></select>
           <input type="submit" value="Отримати результат" />
         </form>
+        <div class="results" id="results-count"></div>
       </section>
 
-      <div class="results" id="results"></div>
+      <div class="results" id="results-info"></div>
+      <div class="results" id="results-time"></div>
+      <div class="results" id="results-count"></div>
     </div>
 
     <script>
@@ -163,9 +168,7 @@
 
         try {
           const response = await fetch(
-            `/api/information-for-date?nameProject=${encodeURIComponent(
-              nameProject
-            )}&date_project=${encodeURIComponent(date_project)}`
+            `/api/information-for-date?nameProject=${nameProject}&date_project=${date_project}`
           );
           const data = await response.json();
 
@@ -183,9 +186,7 @@
 
         try {
           const response = await fetch(
-            `/api/time-for-project?nameProject=${encodeURIComponent(
-              nameProject
-            )}`
+            `/api/time-for-project?nameProject=${nameProject}`
           );
           const data = await response.json();
 
@@ -202,9 +203,7 @@
         const chief = document.getElementById("chief").value;
 
         try {
-          const response = await fetch(
-            `/api/count-workers?chief=${encodeURIComponent(chief)}`
-          );
+          const response = await fetch(`/api/count-workers?chief=${chief}`);
           const data = await response.json();
 
           displayCountResults(data);
@@ -216,7 +215,7 @@
       }
 
       function displayInformationResults(data) {
-        const resultsDiv = document.getElementById("results");
+        const resultsDiv = document.getElementById("results-information");
 
         if (data.length === 0) {
           resultsDiv.innerHTML =
@@ -251,16 +250,12 @@
           `;
         });
 
-        html += `
-            </tbody>
-          </table>
-        `;
-
+        html += `</tbody></table>`;
         resultsDiv.innerHTML = html;
       }
 
       function displayTimeResults(data) {
-        const resultsDiv = document.getElementById("results");
+        const resultsDiv = document.getElementById("results-time");
 
         if (data.length === 0) {
           resultsDiv.innerHTML = "<h2>Немає даних за обраним проєктом.</h2>";
@@ -277,29 +272,25 @@
                 <th>Manager</th>
               </tr>
             </thead>
-            <tbody>
-        `;
+          <tbody>
+          `;
 
         data.forEach((row) => {
           html += `
-            <tr>
-              <td>${row.name_project}</td>
-              <td>${row.total_days}</td>
-              <td>${row.manager}</td>
-            </tr>
-          `;
+          <tr>
+            <td>${row.name_project}</td>
+            <td>${row.total_days}</td>
+            <td>${row.manager}</td>
+          </tr>
+        `;
         });
 
-        html += `
-            </tbody>
-          </table>
-        `;
-
+        html += `</tbody></table>`;
         resultsDiv.innerHTML = html;
       }
 
       function displayCountResults(data) {
-        const resultsDiv = document.getElementById("results");
+        const resultsDiv = document.getElementById("results-count");
 
         if (data.length === 0) {
           resultsDiv.innerHTML = "<h2>Немає даних для обраного керівника.</h2>";
@@ -324,20 +315,17 @@
               <td>${row.chief}</td>
               <td>${row.worker_count}</td>
             </tr>
-          `;
+    `;
         });
 
-        html += `
-            </tbody>
-          </table>
-        `;
-
+        html += `</tbody></table>`;
         resultsDiv.innerHTML = html;
       }
 
       function formatDate(dateString) {
         if (!dateString) return "";
         const date = new Date(dateString);
+        date.setMinutes(date.getMinutes() - date.getTimezoneOffset());
         return date.toISOString().split("T")[0];
       }
     </script>
