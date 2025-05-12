@@ -14,7 +14,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   addFormHandler("countForm", handleCountForm);
 });
 
-async function loadSelect(apiUrl, selector, valueKey, formatter = (v) => v) {
+async function loadSelect(apiUrl, selector, valueKey) {
   try {
     const response = await fetch(apiUrl);
     const data = await response.json();
@@ -26,7 +26,7 @@ async function loadSelect(apiUrl, selector, valueKey, formatter = (v) => v) {
     selects.forEach((select) => {
       select.innerHTML = "";
       data.forEach((item) => {
-        const value = formatter(item[valueKey]);
+        const value = item[valueKey];
         const option = new Option(value, value);
         select.appendChild(option);
       });
