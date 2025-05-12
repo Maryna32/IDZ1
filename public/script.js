@@ -5,7 +5,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       ["#nameProject", "#projectName"],
       "name_project"
     ),
-    loadSelect("/api/dates", "#date_project", "date_project", formatDate),
+    loadSelect("/api/dates", "#date_project", "date_project"),
     loadSelect("/api/chiefs", "#chief", "chief"),
   ]);
 
@@ -46,7 +46,7 @@ async function handleInformationForm(e) {
   const nameProject = document.getElementById("nameProject").value;
   const date = document.getElementById("date_project").value;
 
-  await fetchAndDisplay(
+  await display(
     `/api/information-for-date?nameProject=${nameProject}&date_project=${date}`,
     "results-information",
     ["FID_Worker", "date_project", "time_start", "time_end", "description"],
@@ -62,7 +62,7 @@ async function handleTimeForm(e) {
   e.preventDefault();
   const nameProject = document.getElementById("projectName").value;
 
-  await fetchAndDisplay(
+  await display(
     `/api/time-for-project?nameProject=${nameProject}`,
     "results-time",
     ["name_project", "total_days", "manager"],
@@ -74,7 +74,7 @@ async function handleCountForm(e) {
   e.preventDefault();
   const chief = document.getElementById("chief").value;
 
-  await fetchAndDisplay(
+  await display(
     `/api/count-workers?chief=${chief}`,
     "results-count",
     ["chief", "worker_count"],
@@ -82,7 +82,7 @@ async function handleCountForm(e) {
   );
 }
 
-async function fetchAndDisplay(
+async function display(
   url,
   containerId,
   keys,

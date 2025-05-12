@@ -15,7 +15,6 @@ app.get("/api/projects", async (req, res) => {
     res.json(rows);
   } catch (error) {
     console.error("Error fetching projects:", error);
-    res.status(500).json({ error: "Database error" });
   }
 });
 
@@ -27,7 +26,6 @@ app.get("/api/dates", async (req, res) => {
     res.json(rows);
   } catch (error) {
     console.error("Error fetching dates:", error);
-    res.status(500).json({ error: "Database error" });
   }
 });
 
@@ -37,7 +35,6 @@ app.get("/api/chiefs", async (req, res) => {
     res.json(rows);
   } catch (error) {
     console.error("Error fetching chiefs:", error);
-    res.status(500).json({ error: "Database error" });
   }
 });
 
@@ -56,7 +53,6 @@ app.get("/api/information-for-date", async (req, res) => {
     res.json(rows);
   } catch (error) {
     console.error("Error fetching information for date:", error);
-    res.status(500).json({ error: "Database error" });
   }
 });
 
@@ -76,7 +72,6 @@ app.get("/api/time-for-project", async (req, res) => {
     res.json(rows);
   } catch (error) {
     console.error("Error fetching time for project:", error);
-    res.status(500).json({ error: "Database error" });
   }
 });
 
@@ -96,7 +91,6 @@ app.get("/api/count-workers", async (req, res) => {
     res.json(rows);
   } catch (error) {
     console.error("Error counting workers:", error);
-    res.status(500).json({ error: "Database error" });
   }
 });
 
